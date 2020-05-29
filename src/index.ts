@@ -5,9 +5,14 @@ import { ApolloServer } from "apollo-server";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
 
-// import mongoose from "mongoose";
+import mongoose from "mongoose";
 
-// mongoose.connect(process.env.BACKEND_URI);
+mongoose.connect(String(process.env.MONGODB_URI), {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+const db = mongoose.connection;
+db.once("open", () => console.log("DB connected."));
 
 const server = new ApolloServer({
   typeDefs,
