@@ -4,6 +4,7 @@ dotenv.config();
 import { ApolloServer } from "apollo-server";
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
+import context from "./graphql/context";
 
 import mongoose from "mongoose";
 
@@ -19,6 +20,7 @@ const server = new ApolloServer({
   resolvers,
   playground: true,
   introspection: true,
+  context,
 });
 
 server
