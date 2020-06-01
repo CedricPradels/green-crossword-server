@@ -1,7 +1,9 @@
 import User from "../models/User";
 import authentication from "../helpers/authentication";
 
-import { IResolvers } from "apollo-server";
+import { IResolvers, UserInputError } from "apollo-server";
+
+import { isEmail, isPassword } from "../helpers/predicates";
 
 const resolvers: IResolvers = {
   Query: {
@@ -27,6 +29,17 @@ const resolvers: IResolvers = {
     register: async (_parent, args, _context, _info) => {
       try {
         const { email, password } = args;
+
+        // ERRORS
+        // EMAIL PREDICATE
+        if (!isEmail(email)) throw new UserInputError("Wrong email format");
+        // PASSWORD PREDICATE
+        if (!isPassword(password))
+          throw new UserInputError("Wrong password format");
+        // EMAIL ALREADY EXIST
+        const queryEmail = await User.findOne({ email });
+        if (queryEmail) throw new UserInputError("Email already exist");
+
         const authenticationData = authentication.createAuthenticationData(
           password
         );
@@ -34,7 +47,7 @@ const resolvers: IResolvers = {
 
         return newUser;
       } catch (error) {
-        return null;
+        return error;
       }
     },
   },
