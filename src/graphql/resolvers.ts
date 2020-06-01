@@ -7,25 +7,31 @@ import { isEmail, isPassword } from "../helpers/predicates";
 
 const resolvers: IResolvers = {
   Query: {
+    test: () => console.log("hello, world"),
+  },
+  Mutation: {
     login: async (_parent, args, _context, _info) => {
       try {
         const { email, password: passwordToCheck } = args;
         const user = await User.findOne({ email }).lean(true);
 
-        if (!user) throw "User not found";
+        // ERRORS
+        // EMAIL PREDICATE
+        if (!isEmail(email)) throw new UserInputError("Wrong email format");
+        // EMAIL DOES NOT EXIST
+        if (!!!user) throw new UserInputError("User not found");
 
         const { hash: userHash, salt: userSalt, _id: id, ...safeUser } = user;
 
         if (!authentication.checkPassword(passwordToCheck, userSalt, userHash))
-          throw "Wrong password";
+          throw new UserInputError("Wrong password");
 
         return { ...safeUser, id };
       } catch (error) {
-        return null;
+        console.log(error);
+        return error;
       }
     },
-  },
-  Mutation: {
     register: async (_parent, args, _context, _info) => {
       try {
         const { email, password } = args;
